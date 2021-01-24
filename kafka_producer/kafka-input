@@ -10,7 +10,7 @@ CREATE TABLE MyTable(
     name varchar,
     address varchar
  )WITH(
-    type ='kafka11',
+    type ='kafka',
     bootstrapServers ='172.16.101.196:9092,172.16.100.175:9092,172.16.101.227:9092',
     zookeeperQuorum ='',
     offsetReset ='latest',
