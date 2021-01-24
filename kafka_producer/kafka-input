@@ -1,0 +1,77 @@
+/**
+ * @Author: fanshu
+ * @Date: 2021/01/12
+ * @Description: kafka-habse-kafka验证问题（33089）
+ *
+ */
+
+CREATE TABLE MyTable(
+    id varchar,
+    name varchar,
+    address varchar
+ )WITH(
+    type ='kafka11',
+    bootstrapServers ='172.16.101.196:9092,172.16.100.175:9092,172.16.101.227:9092',
+    zookeeperQuorum ='',
+    offsetReset ='latest',
+    topic ='ss_test1',
+    charsetName ='utf-8',
+    timezone='Asia/Shanghai',
+    updateMode ='append',
+    enableKeyPartitions ='false',
+    topicIsPattern ='false',
+    parallelism ='1'
+ );
+
+CREATE TABLE MyResult(
+    id varchar,
+    name varchar,
+    address varchar,
+    message varchar,
+    info varchar
+ )WITH(
+    type ='kafka11',
+    bootstrapServers ='172.16.101.196:9092,172.16.100.175:9092,172.16.101.227:9092',
+    zookeeperQuorum ='',
+    offsetReset ='latest',
+    topic ='ss_test4',
+    charsetName ='utf-8',
+    timezone='Asia/Shanghai',
+    updateMode ='append',
+    enableKeyPartitions ='false',
+    topicIsPattern ='false',
+    parallelism ='1'
+ );
+
+CREATE TABLE hbase_side(
+    mowen:message varchar as message,
+    mowen:info varchar as info,
+    PRIMARY KEY(rowkey) ,
+    PERIOD FOR SYSTEM_TIME
+ )WITH(
+    type ='hbase',
+    zookeeperQuorum ='172.16.100.195:2181,172.16.101.161:2181,172.16.100.83:2181',
+    zookeeperParent ='/hbase_2.x',
+    tableName ='learn_hbase',
+    partitionedJoin ='false',
+    cache ='LRU',
+    cacheTTLMs ='60000',
+    cacheSize ='10000',
+    parallelism ='1'
+ );
+
+insert
+into
+    MyResult
+    select
+        a.name,
+        a.id,
+        a.address,
+        b.message,
+        b.info,
+        b.rowkey
+    from
+        MyTable a
+    left join
+        hbase_side b
+            on a.id=b.rowkey;
