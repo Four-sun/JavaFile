@@ -8,7 +8,8 @@
 CREATE TABLE MyTable(
     id varchar,
     name varchar,
-    address varchar
+    address1 varchar
+    age varchar
  )WITH(
     type ='kafka',
     bootstrapServers ='172.16.101.196:9092,172.16.100.175:9092,172.16.101.227:9092',
