@@ -49,7 +49,7 @@ CREATE TABLE hbase_side(
     PRIMARY KEY(rowkey) ,
     PERIOD FOR SYSTEM_TIME
  )WITH(
-    type ='hbase',
+    type ='hbase1',
     zookeeperQuorum ='172.16.100.195:2181,172.16.101.161:2181,172.16.100.83:2181',
     zookeeperParent ='/hbase_2.x',
     tableName ='learn_hbase',
@@ -75,3 +75,81 @@ into
     left join
         hbase_side b
             on a.id=b.rowkey;
+
+/**
+ * @Author: 番薯
+ * @Date: 2020/12/30
+ * @Description: 代码优化 #34156 修复维表主键为空PRIMARY KEY(id,age)
+ *
+ */
+
+CREATE TABLE MyTable(
+    id int,
+    name varchar,
+    age int
+ )WITH(
+    type ='kafka11',
+    bootstrapServers ='172.16.101.196:9092,172.16.100.175:9092,172.16.101.227:9092',
+    zookeeperQuorum ='172.16.101.196:2181,172.16.100.175:2181,172.16.101.227:2181/kafka',
+    offsetReset ='latest',
+    topic ='ss_test1',
+    charsetName ='utf-8',
+    timezone='Asia/Shanghai',
+    updateMode ='append',
+    enableKeyPartitions ='false',
+    topicIsPattern ='false',
+    parallelism ='1'
+ );
+
+CREATE TABLE MyResult(
+    mt_id int,
+    st_productName varchar,
+    mt_age int,
+    st_age int
+ )WITH(
+    type ='kafka11',
+    bootstrapServers ='172.16.101.196:9092,172.16.100.175:9092,172.16.101.227:9092',
+    zookeeperQuorum ='172.16.101.196:2181,172.16.100.175:2181,172.16.101.227:2181/kafka',
+    offsetReset ='latest',
+    topic ='ss_test5',
+    charsetName ='utf-8',
+    timezone='Asia/Shanghai',
+    updateMode ='append',
+    enableKeyPartitions ='false',
+    topicIsPattern ='false',
+    parallelism ='1'
+ );
+
+CREATE TABLE SideTable(
+    id INT,
+    productName VARCHAR,
+    age INT,
+    cTime TIMESTAMP,
+    PRIMARY KEY(id,age) ,
+    PERIOD FOR SYSTEM_TIME
+ )WITH(
+    type ='mysql',
+    url ='jdbc:mysql://172.16.100.214:3306/DTStream',
+    userName ='root',
+    password = 'abc123',
+    tableName ='TestDemoOne',
+    partitionedJoin ='false',
+    cache ='LRU',
+    cacheTTLMs ='60000',
+    cacheSize ='10000',
+    parallelism ='1'
+ );
+
+INSERT
+INTO
+    MyResult
+    SELECT
+        mt.id as mt_id,
+        st.productName as st_productName,
+        mt.age as mt_age,
+        st.age as st_age
+    FROM
+        MyTable mt
+    JOIN
+        SideTable st
+            ON mt.id = st.id;
