@@ -49,7 +49,7 @@ CREATE TABLE hbase_side(
     PRIMARY KEY(rowkey) ,
     PERIOD FOR SYSTEM_TIME
  )WITH(
-    type ='hbase',
+    type ='hbase12',
     zookeeperQuorum ='172.16.100.195:2181,172.16.101.161:2181,172.16.100.83:2181',
     zookeeperParent ='/hbase_2.x',
     tableName ='learn_hbase',
